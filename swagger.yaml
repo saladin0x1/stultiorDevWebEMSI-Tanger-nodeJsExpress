@@ -1,0 +1,194 @@
+openapi: 3.0.0
+info:
+  title: User API
+  version: 1.0.0
+  description: API documentation for user testing and role-based access.
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/auth/signup:
+    post:
+      summary: User Registration
+      description: Registers a new user with a username, email, and password. Users can specify roles.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "saladin"
+                email:
+                  type: string
+                  example: "saladin@localhost.io"
+                password:
+                  type: string
+                  example: "saladin@localhost.io"
+                roles:
+                  type: array
+                  items:
+                    type: string
+                    enum: ["role_user", "role_moderator", "role_admin"]
+                  example: ["admin"]  # You can choose one or multiple roles.
+      responses:
+        '200':
+          description: User registered successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User registered successfully!"
+        '500':
+          description: Internal server error.
+
+  /api/auth/signin:
+    post:
+      summary: User Login
+      description: Authenticates the user and sets a session cookie.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "saladin"
+                password:
+                  type: string
+                  example: "saladin@localhost.io"
+      responses:
+        '200':
+          description: User logged in successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  username:
+                    type: string
+                    example: "saladin"
+                  email:
+                    type: string
+                    example: "saladin@localhost.io"
+                  roles:
+                    type: array
+                    items:
+                      type: string
+                      example: ["ROLE_USER", "ROLE_MODERATOR"]
+        '404':
+          description: User not found.
+        '401':
+          description: Invalid password.
+
+  /api/auth/signout:
+    post:
+      summary: User Logout
+      description: Logs out the user by clearing the session.
+      responses:
+        '200':
+          description: Successfully logged out.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "You've been signed out!"
+
+  /api/test/all:
+    get:
+      summary: Public Access Endpoint
+      description: This endpoint can be accessed by anyone.
+      responses:
+        '200':
+          description: Successful response with public content.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Public Content."
+
+  /api/test/user:
+    get:
+      summary: User Access Endpoint
+      description: This endpoint can be accessed by authenticated users with a valid session cookie.
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Successful response with user content.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User Content."
+        '401':
+          description: Unauthorized access.
+
+  /api/test/mod:
+    get:
+      summary: Moderator Access Endpoint
+      description: This endpoint can be accessed by moderators only.
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Successful response with moderator content.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Moderator Content."
+        '401':
+          description: Unauthorized access.
+        '403':
+          description: Access forbidden for non-moderators.
+
+  /api/test/admin:
+    get:
+      summary: Admin Access Endpoint
+      description: This endpoint can be accessed by administrators only.
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Successful response with admin content.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Admin Content."
+        '401':
+          description: Unauthorized access.
+        '403':
+          description: Access forbidden for non-admins.
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: dumber-session
