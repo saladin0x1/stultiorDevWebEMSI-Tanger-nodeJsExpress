@@ -1,12 +1,14 @@
+// app/controllers/allUsers.controller.js
 const db = require("../models");
-const User = db.user;
+const User = db.user; // Assuming you have a 'user' model
 
-// Controller to retrieve all users
-exports.findAllUsers = async (req, res) => {
-  try {
-    const users = await User.findAll();
-    res.json(users); // Send users as JSON response
-  } catch (error) {
-    res.status(500).json({ message: "Error retrieving users", error: error.message });
-  }
+// Define the function to retrieve all users
+exports.findAllUsers = (req, res) => {
+  User.find({})
+    .then(users => {
+      res.status(200).send(users);
+    })
+    .catch(err => {
+      res.status(500).send({ message: err.message });
+    });
 };
